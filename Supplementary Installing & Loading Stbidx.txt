@@ -1,0 +1,22 @@
+##Please instal and load follwoing packages for correctly running "Stbidx" package:
+
+
+install.packages(c('devtools', 'Rcpp', 'roxygen2')) #Will install requiered packages for installing Stbidx package
+
+require(devtools)
+require(roxygen2)
+require(Rcpp)
+
+
+install.packages(c("gplots", "ggplot2", "tidyverse", "readexcel", "xlsx", "agricolae", "gge")) #Will install requered packages
+
+setwd(choose.dir()) #Provide the path to the package source
+install.packages("Stbidx_0.0.0.9000.tar.gz", repos = NULL, type = "source")
+
+
+library(Stbidx) #Loading Stbidx package in R
+
+index()
+sid()
+ammi()
+ggebiplot()
