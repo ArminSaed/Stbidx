@@ -1,0 +1,209 @@
+
+*/The wrote code for calculating univariate stability indices in SAS software.*/
+
+*/This code is originally written by Armin Saed-Moucheshi: saedmoocheshi@gmail.com; */
+
+
+
+data Armin;
+input NZ_17	NG_17	NG_18	NG_19	NG_20	NS_20	SZ_17	SG_17	SG_18	SG_19	SG_20	SS_20;
+cards;
+
+876.8	717.4	618.4533333	629.5	519.9666667	653.48	346	272.2333333	360.2333333	278.6666667	221.7	377.06
+770.7333333	652.7333333	863.8933333	742.3666667	631.9666667	787.1	337.6666667	263.3333333	326.23	363	286.5333333	366.52
+679.3666667	553.6333333	760.9333333	725.6	597.3666667	765.68	185.6666667	145.3	344.41	351.6666667	279.3666667	283.22
+780.7	650.9333333	754.3466667	729.2333333	626.1	767.04	286.6666667	221.5	370.67	321.6666667	252.9666667	421.26
+1069.433333	865.8	679.4666667	701.4	579.2333333	738.48	423	329.7333333	384.4733333	234	186.1666667	323.34
+752.3333333	636.7666667	837.2	811.6666667	691.8666667	735.76	304.6666667	236.1666667	307.04	428	333.9	314.16
+751.8333333	607.1333333	670.8	757.6	616.0333333	667.76	297	229.8666667	365.62	245	192.5333333	212.16
+762.8333333	664.6666667	792.48	675.2	571.2333333	537.54	273.6666667	222.5	323.2	333	258.7333333	318.24
+1051.6	880.1666667	963.04	690.9333333	564.1333333	805.8	416	341.0333333	344.41	280	219.4666667	308.72
+632.6333333	556.8	1107.6	882	743.5666667	743.24	414	336.2	447.0933333	422	329.2333333	216.24
+970.7333333	842.8666667	863.8933333	709.3	579.4666667	808.18	304	246.8333333	370.67	362.6666667	284.9333333	318.58
+1105.133333	922.8333333	749.6666667	776	657.5	859.18	308	251.5666667	305.3566667	291	226.1	219.98
+628.4333333	553.4333333	742.2133333	679.9	557.0333333	874.82	333	270.7333333	348.45	391.6666667	307.7	370.94
+942.4	788.1333333	714.8266667	740.8	628.9333333	986.34	389	318.9333333	352.1533333	285.6666667	222.7666667	353.94
+778.6	650.2333333	768.2133333	787	642.4	1030.54	330.6666667	270.8	292.9	349	272.3333333	285.94
+821.6333333	712.6	681.5466667	656.8	554.1	721.44	405	328.3333333	277.4133333	273.6666667	212.6333333	411.9033333
+711.4	600.8333333	707.8933333	502.9666667	406.9333333	820.56	362.6666667	297.4333333	301.3166667	150	116.9666667	337.34
+914.6	787.4333333	736.4933333	1012.733333	849.3666667	617.76	323	262.6666667	303.6733333	317.6666667	246.7666667	209.4066667
+894.1	756.3666667	735.6266667	712.4333333	575.5666667	801.4933333	509	415.0333333	277.0766667	354.6666667	274.3333333	453.49
+899.3333333	777.6	859.2133333	701.9333333	573.3	755.7333333	287	232.8666667	341.7166667	250.6666667	196.6	258.56
+1155.533333	970.2666667	847.2533333	778.0666667	654.7666667	690.9066667	377.6666667	309.7333333	332.29	370.6666667	289.1	296.6033333
+773.9	671.5666667	730.8116667	694.1	569	629.5466667	326	265.3	336.3466667	294.6666667	230.4666667	292.9
+846.3	708.1666667	984.3366667	589.0666667	485.7	748.4533333	325	265.1	352.6266667	256.6666667	197.8	321.8533333
+822.7	692.5333333	755.8483333	861	693.8333333	711.0133333	408.6666667	335.2666667	388.3133333	342.6666667	266.8	328.5866667
+794.8666667	690.5333333	885.4566667	790.1333333	657.6333333	763.7066667	288.6666667	234.8333333	395.38	356.6666667	276.1	327.24
+804.3	677.4333333	918.3483333	767.5666667	618.6333333	644.4533333	379	309.6333333	360.33	277	214.9333333	266.3033333
+696.1666667	601.6333333	813.2	673.0666667	562.5	758.8533333	307.6666667	249.8333333	367.3666667	267.6666667	206.1	318.15
+776.5	671.4666667	744.8616667	877.8	738	807.85	372	301.7666667	356.8666667	243	199.2666667	319.3
+707.2	610	721.24	844.1333333	719.5413333	765.1906667	288	234.0666667	306.03	445.12	347.256	326.7263333
+903.0333333	789.9	725.4	787.904	640.6746667	694.4703333	326	265.4333333	349.1233333	254.8	200.2346667	220.6463333
+
+
+;
+
+proc iml;
+
+use Armin;read all into A;
+q   = Ncol(A);
+G	= Nrow(A);
+R	=repeat(A[,+], 1, q);			*print R;
+S2i = (A - (R/q))##2;
+Ch1	= Char (G); S1= "G" + Strip(Ch1);  Gs  = "G1" : S1; 
+Ch2 = Char (q); S2= "q" + strip(Ch2);  qs  = "q"  : S2;
+S2i = S2i[,+] / (q-1);				*print S2i[L="Enviromental variance" C="S2i" R=Gs];
+Min = Min(S2i);						*print Min [L="Stabel variance(Enviromental variance)"];
+Max = Max(S2i);						*Print Max [L="Unstable Variance(Enviromental variance)"];
+
+CV  = Sqrt(S2i)/A[,:] * 100;				*Print CV  [L="Genotypic coefficient of variation" C="CVi" R=Gs];
+
+yi0 = A[,:];
+My  = A[:];
+Mcv = CV[:];
+		
+					create Mean var {Mcv My};
+						Append;
+					Close Mean;
+
+					create CV var {yi0 Cv};
+						Append;
+					Close Cv;
+
+
+Mq    = A[:,];
+B	  =A`;
+Me   =B[,:];
+BB    =B[,:];
+BB    = Repeat(bb, 1, G);
+B     =B - BB;
+B     =B`; 
+RRR   = Repeat(My, G, q);
+Yi    = Repeat(Yi0, 1, q);
+W     = (B - Yi + RRR)##2; 
+W2i	  = W[,+];					*print W2i[l="Wricke's Ecovalance" R=Gs C="W2i"];
+
+Y0j   = Mq`;					 
+AA    = A`;
+					Create Y0j var {y0j Me};
+						Append;
+					Close Y0j;
+
+					Create AA From AA;
+						Append From AA;
+					Close AA;
+
+
+
+X1= A##2;X2=X1[+];
+D1=A[+,];D2=D1##2;D3=D2[+];
+DD1=A[,+];DD2=DD1##2;DD3=DD2[+];
+XX1=A[+];XX2=XX1**2;
+SSge = X2 - (D3/G) - (DD3/q) + (XX2/(G*q)); *print ssge [l="this is SSge colculating from the mean table"];
+SS = W2i[+];								*print ss[l="this is SSge colculating from the sumation of Wi2"];
+SSge = repeat(ss, G, 1);
+p1=G/((G-2)*(q-1));
+P2=(G-1)*(G-2)#(q-1);
+Sv = (P1#W2i)-(SSge/P2); 
+											*print Sv [L="Shukla's stability variance"];
+
+v=A`;
+C1=Y0j#v;
+C1=C1[+,];
+C1=C1`;
+f1=A[:,];
+k=repeat(F1[+], G, 1);
+C2=(A[,+]);
+C2=C2#K;
+C3=Y0j##2;
+C4=(C3[+])-(((F1[+])##2)/q);
+C4=repeat(C4, G, 1); 
+bxy=(C1-(C2/q))/C4; 					*print bxy [Label="these are regression coefficient for regressing eachgenotypes means on
+allover genotypes mean for  testing stability(Respons parameter)" Rowname=Gs Colname="bi"];
+
+FF1=Repeat(Yi0, 1, q);
+FF2=(A-FF1)##2;
+FF2=FF2[,+]; 
+b2 =bxy##2;*							print b2; 
+SS=A[:];
+SS=Repeat(SS, q, 1);
+SS2=(Y0j -SS)##2;
+SS2=SS2[+];
+bss=b2*SS2;
+sdi=(FF2-bss) / (q-2);					*print sdi [l="Deviation from the regresion for each genotype" c="S2di" R=Gs]; 
+
+R2=bss/FF2; 							*print R2  [l="Coefficent of determination for each genotype" c="R2" R=Gs]; 
+
+SP= Yi0 || S2i || CV || W2i || Sv || bxy || sdi || R2;
+										print Sp[ L="Stability parameters for genotypes" R=Gs C={"Yi0" "S2i" "CV" "W2i" "Shukla_Var" "bxy" "sdi" "R2"}];
+
+
+
+						reset fuzz=0.00000000001;
+II=repeat ((A[:]), q, 1);
+I=(Y0j) - II;							*print I [L="these are environmental indices for each environment"];
+SI=I[+]; 								*print SI[l="this is the sum of the Environmentall indices"];
+I2=I##2;
+I3=I2[+];
+S=A * I;
+b=S/I3;									print b [L="Regression coefficient for Eberhart_Rasel model" R=Gs c="bi"];
+
+RR1=A##2;RR1=RR1[,+];
+RR2=((A[,+])##2)/q;
+SSy = RR1-RR2; 							*print SSy[L="Genotypes Sum of squares" r=Gs C="SS"];
+MSy=SSy/(G-1);							*print MSy[L="Genotypes mean squares" r=Gs C="MS"];
+SSreg=b#S;								*print SSreg[L="Sum of squares for genotype regression coefficients in Eberhart_Rasel model" R=Gs C="SSreg"];
+MSreg=SSreg; 							*print MSreg[L="Mean squares for genotype regression coefficients in Eberhart_Rasel model" R=Gs C="MSreg"];
+SS_di=SSy - SSreg;						*print SS_di[L="Sum of squares deviation from regression for each genotype Eberhart_Rasel model" R=Gs C="SSd"];
+MS_di=SS_di/(q-2);						*print MS_di[L="Mean squares deviation from regression for each genotype Eberhart_Rasel model" R=Gs C="MSd"];
+
+Eber = Yi0||SSy||b||SSreg||SS_di;		print eber[L="Eberhart and Rasel model" R=Gs C={"trait_mean" "ss_trait" "regresion_coefficient" "SS_regresion" "SS_deviation"}];
+Eber = Yi0||MSy||b||MSreg||MS_di;		print eber[L="Eberhart and Rasel model" R=Gs C={"trait_mean" "Ms trait" "regresion_coefficient" "MS_regresion" "MS_deviation"}];
+Freg = MSreg/MS_di;						*print Freg[l="F_Value for regression coefficient testing" R=Gs c="F"];
+						reset fuzz=0.00001;
+Preg = (1-(probF(Freg, 1, (q-2))))##2;	*print Preg[l="P_Value for regression coefficient testing" R=Gs c="P_Value"];
+ANOVA= MSreg || MS_di || Freg || Preg;  print ANOVA[L="overall ANOVA for genotypes reg" R=Gs C={"MS_Reg" "MS_d" "F" "P" }];
+
+								Create Graph var {b yi0};
+								append;
+								close graph;
+
+
+quit;
+*proc print data=CV;
+*proc print data=Mean;
+run;
+
+proc gplot data=CV;
+plot yi0*CV ;
+run;
+
+
+data Saed;set AA; set Y0j;
+proc print data=saed;
+run;
+
+
+symbol1 i=R value=none color=blue;
+symbol2 i=R value=dot color=black;
+proc gplot data=Saed;
+plot Y0j*Me Col1*Me/ overlay;
+plot Y0j*Me Col2*Me/ overlay;
+plot Y0j*Me Col3*Me/ overlay;
+plot Y0j*Me Col4*Me/ overlay;
+plot Y0j*Me Col5*Me/ overlay;
+plot Y0j*Me Col6*Me/ overlay;
+plot Y0j*Me Col7*Me/ overlay;
+plot Y0j*Me Col8*Me/ overlay;
+plot Y0j*Me Col9*Me/ overlay;
+plot Y0j*Me Col10*Me/ overlay;
+run;
+
+symbol1 i=none value=dot color=black;
+symbol2 i=none value=dot color=black;
+proc gplot data=Graph;
+plot b*yi0/vref=1;
+run;
+
+proc print data=graph;
+run;
